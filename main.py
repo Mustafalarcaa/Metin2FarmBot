@@ -67,8 +67,6 @@ async def ekle(interaction, oda: str, kivrik: int):
     embed = discord.Embed(title="✅ Kayıt Eklendi",
                           description=f"Oda: {oda}\nKatılanlar: {katilanlar}\nKıvrık: {kivrik}",
                           color=discord.Color.green())
-            for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
-        embed.add_field(name=oyuncu, value=f"{adet} set", inline=True)
     await interaction.response.send_message(embed=embed)
 
 @bot.tree.command(name="kıvrık", description="Toplam toplanan kıvrık miktarını gösterir", guild=discord.Object(id=GUILD_ID))
@@ -85,14 +83,12 @@ async def kivrik(interaction):
         return
 
     kivrik_toplam = 0
-    for katilanlar, _ in rows:
+    for katilanlar, kivrik in rows:
         oyuncular = [isim.strip() for isim in katilanlar.split(",")]
         kivrik_toplam += int(kivrik)
 
     embed = discord.Embed(title="📦 Toplam Kıvrık", color=discord.Color.gold())
     embed.add_field(name="Bu haftaki toplam:", value=f"{kivrik_toplam} kıvrık", inline=False)
-            for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
-        embed.add_field(name=oyuncu, value=f"{adet} set", inline=True)
     await interaction.response.send_message(embed=embed)
 
 @bot.tree.command(name="rapor", description="Katılım raporu: kim kaç set geldi", guild=discord.Object(id=GUILD_ID))
@@ -109,17 +105,13 @@ async def rapor(interaction):
         return
 
     set_sayilari = defaultdict(int)
-
     for katilanlar, _ in rows:
         oyuncular = [isim.strip() for isim in katilanlar.split(",")]
         for oyuncu in oyuncular:
             set_sayilari[oyuncu] += 1
 
-    toplam_kivrik = sum(kivrik_toplam.values())
-    embed = discord.Embed(title="📊 Haftalık Katılım Raporu", color=discord.Color.purple())
-    embed.add_field(name="Toplam Kıvrık", value=f"{toplam_kivrik} kıvrık", inline=False)
-
-            for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
+    embed = discord.Embed(title="📋 Haftalık Katılım Raporu", color=discord.Color.blurple())
+    for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
         embed.add_field(name=oyuncu, value=f"{adet} set", inline=True)
     await interaction.response.send_message(embed=embed)
 
