@@ -3,13 +3,14 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import sqlite3
-from collections import Counter
+from collections import defaultdict
 from datetime import datetime
 import os
 
 TOKEN = os.getenv("TOKEN")
 GUILD_ID = 786207061310046288
 ADMIN_ROLE_ID = 1162483008532656289
+EFSANE_ROLE_ID = 1383517464335351848
 
 intents = discord.Intents.default()
 intents.guilds = True
@@ -32,11 +33,14 @@ async def on_ready():
 def is_admin(interaction):
     return any(role.id == ADMIN_ROLE_ID for role in interaction.user.roles)
 
+def is_efsane(interaction):
+    return any(role.id == EFSANE_ROLE_ID for role in interaction.user.roles)
+
 @bot.tree.command(name="ekle", description="Ses kanalındaki oyuncularla kıvrık kaydı yap", guild=discord.Object(id=GUILD_ID))
 @app_commands.describe(oda="Oda adı", kivrik="Toplanan kıvrık sayısı")
 async def ekle(interaction, oda: str, kivrik: int):
-    if not is_admin(interaction):
-        await interaction.response.send_message("Yetkin yok!", ephemeral=True)
+    if not is_efsane(interaction):
+        await interaction.response.send_message("Bu komutu kullanamazsın.", ephemeral=True)
         return
 
     if not interaction.user.voice or not interaction.user.voice.channel:
@@ -67,27 +71,31 @@ async def ekle(interaction, oda: str, kivrik: int):
 
 @bot.tree.command(name="rapor", description="Haftalık rapor", guild=discord.Object(id=GUILD_ID))
 async def rapor(interaction):
-    if not is_admin(interaction):
-        await interaction.response.send_message("Yetkin yok!", ephemeral=True)
+    if not is_efsane(interaction):
+        await interaction.response.send_message("Bu komutu kullanamazsın.", ephemeral=True)
         return
 
-    c.execute("SELECT katilanlar FROM sets")
+    c.execute("SELECT katilanlar, kivrik_sayisi FROM sets")
     rows = c.fetchall()
 
     if not rows:
         await interaction.response.send_message("Kayıt yok.")
         return
 
-    kisi_counter = Counter()
-    for katilanlar_tuple in rows:
-        katilanlar = katilanlar_tuple[0]
+    set_sayilari = defaultdict(int)
+    kivrik_toplam = defaultdict(int)
+
+    for katilanlar, kivrik in rows:
         oyuncular = [isim.strip() for isim in katilanlar.split(",")]
         for oyuncu in oyuncular:
-            kisi_counter[oyuncu] += 1
+            set_sayilari[oyuncu] += 1
+            kivrik_toplam[oyuncu] += int(kivrik / len(oyuncular))
 
     embed = discord.Embed(title="📊 Haftalık Katılım Raporu", color=discord.Color.purple())
-    for oyuncu, adet in kisi_counter.items():
-        embed.add_field(name=oyuncu, value=f"{adet} set", inline=True)
+    for oyuncu in sorted(set_sayilari.keys(), key=lambda x: -set_sayilari[x]):
+        embed.add_field(name=oyuncu,
+                        value=f"{set_sayilari[oyuncu]} set - {kivrik_toplam[oyuncu]} kıvrık",
+                        inline=False)
 
     await interaction.response.send_message(embed=embed)
 
