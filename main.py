@@ -67,9 +67,35 @@ async def ekle(interaction, oda: str, kivrik: int):
     embed = discord.Embed(title="✅ Kayıt Eklendi",
                           description=f"Oda: {oda}\nKatılanlar: {katilanlar}\nKıvrık: {kivrik}",
                           color=discord.Color.green())
+        for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
+        embed.add_field(name=oyuncu, value=f"{adet} set", inline=True)
     await interaction.response.send_message(embed=embed)
 
-@bot.tree.command(name="rapor", description="Haftalık rapor", guild=discord.Object(id=GUILD_ID))
+@bot.tree.command(name="kıvrık", description="Toplam toplanan kıvrık miktarını gösterir", guild=discord.Object(id=GUILD_ID))
+async def kivrik(interaction):
+    if not is_efsane(interaction):
+        await interaction.response.send_message("Bu komutu kullanamazsın.", ephemeral=True)
+        return
+
+    c.execute("SELECT katilanlar, kivrik_sayisi FROM sets")
+    rows = c.fetchall()
+
+    if not rows:
+        await interaction.response.send_message("Kayıt yok.")
+        return
+
+    kivrik_toplam = 0
+    for katilanlar, _ in rows:
+        oyuncular = [isim.strip() for isim in katilanlar.split(",")]
+        kivrik_toplam += int(kivrik)
+
+    embed = discord.Embed(title="📦 Toplam Kıvrık", color=discord.Color.gold())
+    embed.add_field(name="Bu haftaki toplam:", value=f"{kivrik_toplam} kıvrık", inline=False)
+        for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
+        embed.add_field(name=oyuncu, value=f"{adet} set", inline=True)
+    await interaction.response.send_message(embed=embed)
+
+@bot.tree.command(name="rapor", description="Katılım raporu: kim kaç set geldi", guild=discord.Object(id=GUILD_ID))
 async def rapor(interaction):
     if not is_efsane(interaction):
         await interaction.response.send_message("Bu komutu kullanamazsın.", ephemeral=True)
@@ -82,26 +108,19 @@ async def rapor(interaction):
         await interaction.response.send_message("Kayıt yok.")
         return
 
-    kivrik_toplam = defaultdict(int)
-
-    for katilanlar, kivrik in rows:
-        oyuncular = [isim.strip() for isim in katilanlar.split(",")]
-        for oyuncu in oyuncular:
-            kivrik_toplam[oyuncu] += int(kivrik / len(oyuncular))
-
-    toplam_kivrik = sum(kivrik_toplam.values())
-    embed = discord.Embed(title="📊 Haftalık Katılım Raporu", color=discord.Color.purple())
-    embed.add_field(name="Toplam Kıvrık", value=f"{toplam_kivrik} kıvrık", inline=False)
-
     set_sayilari = defaultdict(int)
+
     for katilanlar, _ in rows:
         oyuncular = [isim.strip() for isim in katilanlar.split(",")]
         for oyuncu in oyuncular:
             set_sayilari[oyuncu] += 1
 
-    for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
-        embed.add_field(name=oyuncu, value=f"{adet} set", inline=True)
+    toplam_kivrik = sum(kivrik_toplam.values())
+    embed = discord.Embed(title="📊 Haftalık Katılım Raporu", color=discord.Color.purple())
+    embed.add_field(name="Toplam Kıvrık", value=f"{toplam_kivrik} kıvrık", inline=False)
 
+        for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
+        embed.add_field(name=oyuncu, value=f"{adet} set", inline=True)
     await interaction.response.send_message(embed=embed)
 
 @bot.tree.command(name="sifirla", description="Tüm verileri sıfırla ve yedekle", guild=discord.Object(id=GUILD_ID))
