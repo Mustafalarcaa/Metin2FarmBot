@@ -67,7 +67,7 @@ async def ekle(interaction, oda: str, kivrik: int):
     embed = discord.Embed(title="✅ Kayıt Eklendi",
                           description=f"Oda: {oda}\nKatılanlar: {katilanlar}\nKıvrık: {kivrik}",
                           color=discord.Color.green())
-        for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
+            for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
         embed.add_field(name=oyuncu, value=f"{adet} set", inline=True)
     await interaction.response.send_message(embed=embed)
 
@@ -91,7 +91,7 @@ async def kivrik(interaction):
 
     embed = discord.Embed(title="📦 Toplam Kıvrık", color=discord.Color.gold())
     embed.add_field(name="Bu haftaki toplam:", value=f"{kivrik_toplam} kıvrık", inline=False)
-        for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
+            for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
         embed.add_field(name=oyuncu, value=f"{adet} set", inline=True)
     await interaction.response.send_message(embed=embed)
 
@@ -119,7 +119,7 @@ async def rapor(interaction):
     embed = discord.Embed(title="📊 Haftalık Katılım Raporu", color=discord.Color.purple())
     embed.add_field(name="Toplam Kıvrık", value=f"{toplam_kivrik} kıvrık", inline=False)
 
-        for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
+            for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
         embed.add_field(name=oyuncu, value=f"{adet} set", inline=True)
     await interaction.response.send_message(embed=embed)
 
