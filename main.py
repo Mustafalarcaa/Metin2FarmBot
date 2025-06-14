@@ -92,10 +92,9 @@ async def rapor(interaction):
             kivrik_toplam[oyuncu] += int(kivrik / len(oyuncular))
 
     embed = discord.Embed(title="📊 Haftalık Katılım Raporu", color=discord.Color.purple())
+    toplam_kivrik = sum(kivrik_toplam.values())
+    embed.add_field(name="Toplam Kıvrık", value=f"{toplam_kivrik} kıvrık", inline=False)
     for oyuncu in sorted(set_sayilari.keys(), key=lambda x: -set_sayilari[x]):
-        embed.add_field(name=oyuncu,
-                        value=f"{set_sayilari[oyuncu]} set - {kivrik_toplam[oyuncu]} kıvrık",
-                        inline=False)
 
     await interaction.response.send_message(embed=embed)
 
