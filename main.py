@@ -123,25 +123,31 @@ async def rapor(interaction):
             await interaction.response.send_message("Kayıt yok.")
             return
 
-        from collections import defaultdict
         set_sayilari = defaultdict(int)
         for katilanlar_tuple in rows:
             oyuncular = [isim.strip() for isim in katilanlar_tuple[0].split(",")]
             for oyuncu in oyuncular:
                 set_sayilari[oyuncu] += 1
 
-        embed = discord.Embed(title="📋 Haftalık Katılım Raporu", color=discord.Color.blurple())
+        oyuncu_listesi = list(sorted(set_sayilari.items(), key=lambda x: -x[1]))
 
-        if set_sayilari:
-            for oyuncu, adet in list(sorted(set_sayilari.items(), key=lambda x: -x[1]))[:25]:
+        embeds = []
+        for i in range(0, len(oyuncu_listesi), 25):
+            embed = discord.Embed(title="📋 Haftalık Katılım Raporu", color=discord.Color.blurple())
+            for oyuncu, adet in oyuncu_listesi[i:i+25]:
                 embed.add_field(name=oyuncu, value=f"{adet} set", inline=True)
-        else:
-            embed.description = "Katılım verisi bulunamadı."
+            embeds.append(embed)
 
-        await interaction.response.send_message(embed=embed)
+        # İlk mesajı interaction üzerinden gönder
+        await interaction.response.send_message(embed=embeds[0])
+
+        # Geri kalan embed'leri takip eden mesaj olarak gönder
+        for embed in embeds[1:]:
+            await interaction.channel.send(embed=embed)
 
     except Exception as e:
         await interaction.response.send_message(f"Hata oluştu: {e}", ephemeral=True)
+
 
 keep_alive()
 bot.run(TOKEN)
