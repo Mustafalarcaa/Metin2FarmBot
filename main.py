@@ -109,9 +109,6 @@ async def sifirla(interaction):
 
     await interaction.response.send_message("Tüm veriler sıfırlandı ve yedeklendi ✅")
 
- except Exception as e:
-        await interaction.response.send_message(f"Hata oluştu: {e}", ephemeral=True)
-
 @bot.tree.command(name="rapor", description="Katılım raporu: kim kaç set geldi", guild=discord.Object(id=GUILD_ID))
 async def rapor(interaction):
     try:
