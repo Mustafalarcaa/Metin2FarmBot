@@ -110,6 +110,14 @@ async def sifirla(interaction):
 
     await interaction.response.send_message("Tüm veriler sıfırlandı ve yedeklendi ✅")
 
+keep_alive()
+bot.run(TOKEN)
+
+
+
+    except Exception as e:
+        await interaction.response.send_message(f"Hata oluştu: {e}", ephemeral=True)
+
 @bot.tree.command(name="rapor", description="Katılım raporu: kim kaç set geldi", guild=discord.Object(id=GUILD_ID))
 async def rapor(interaction):
     try:
@@ -134,7 +142,7 @@ async def rapor(interaction):
         embed = discord.Embed(title="📋 Haftalık Katılım Raporu", color=discord.Color.blurple())
 
         if set_sayilari:
-            for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
+            for oyuncu, adet in list(sorted(set_sayilari.items(), key=lambda x: -x[1]))[:25]:
                 embed.add_field(name=oyuncu, value=f"{adet} set", inline=True)
         else:
             embed.description = "Katılım verisi bulunamadı."
@@ -144,6 +152,3 @@ async def rapor(interaction):
     except Exception as e:
         await interaction.response.send_message(f"Hata oluştu: {e}", ephemeral=True)
 
-# BOTU SONDA ÇALIŞTIR
-keep_alive()
-bot.run(TOKEN)
