@@ -93,6 +93,15 @@ async def rapor(interaction):
     embed = discord.Embed(title="📊 Haftalık Katılım Raporu", color=discord.Color.purple())
     embed.add_field(name="Toplam Kıvrık", value=f"{toplam_kivrik} kıvrık", inline=False)
 
+    set_sayilari = defaultdict(int)
+    for katilanlar, _ in rows:
+        oyuncular = [isim.strip() for isim in katilanlar.split(",")]
+        for oyuncu in oyuncular:
+            set_sayilari[oyuncu] += 1
+
+    for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
+        embed.add_field(name=oyuncu, value=f"{adet} set", inline=True)
+
     await interaction.response.send_message(embed=embed)
 
 @bot.tree.command(name="sifirla", description="Tüm verileri sıfırla ve yedekle", guild=discord.Object(id=GUILD_ID))
