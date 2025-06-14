@@ -92,7 +92,6 @@ async def kivrik(interaction):
     await interaction.response.send_message(embed=embed)
 
 
-
 @bot.tree.command(name="sifirla", description="Tüm verileri sıfırla ve yedekle", guild=discord.Object(id=GUILD_ID))
 async def sifirla(interaction):
     if not is_admin(interaction):
@@ -110,12 +109,7 @@ async def sifirla(interaction):
 
     await interaction.response.send_message("Tüm veriler sıfırlandı ve yedeklendi ✅")
 
-keep_alive()
-bot.run(TOKEN)
-
-
-
-    except Exception as e:
+ except Exception as e:
         await interaction.response.send_message(f"Hata oluştu: {e}", ephemeral=True)
 
 @bot.tree.command(name="rapor", description="Katılım raporu: kim kaç set geldi", guild=discord.Object(id=GUILD_ID))
@@ -152,3 +146,9 @@ async def rapor(interaction):
     except Exception as e:
         await interaction.response.send_message(f"Hata oluştu: {e}", ephemeral=True)
 
+keep_alive()
+bot.run(TOKEN)
+
+
+
+   
