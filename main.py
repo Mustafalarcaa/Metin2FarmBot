@@ -111,8 +111,13 @@ async def rapor(interaction):
             set_sayilari[oyuncu] += 1
 
     embed = discord.Embed(title="📋 Haftalık Katılım Raporu", color=discord.Color.blurple())
-    for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
-        embed.add_field(name=oyuncu, value=f"{adet} set", inline=True)
+
+    if set_sayilari:
+        for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
+            embed.add_field(name=oyuncu, value=f"{adet} set", inline=True)
+    else:
+        embed.description = "Katılım verisi bulunamadı."
+
     await interaction.response.send_message(embed=embed)
 
 @bot.tree.command(name="sifirla", description="Tüm verileri sıfırla ve yedekle", guild=discord.Object(id=GUILD_ID))
