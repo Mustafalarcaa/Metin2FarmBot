@@ -91,34 +91,7 @@ async def kivrik(interaction):
     embed.add_field(name="Bu haftaki toplam:", value=f"{kivrik_toplam} kıvrık", inline=False)
     await interaction.response.send_message(embed=embed)
 
-@bot.tree.command(name="rapor", description="Katılım raporu: kim kaç set geldi", guild=discord.Object(id=GUILD_ID))
-async def rapor(interaction):
-    if not is_efsane(interaction):
-        await interaction.response.send_message("Bu komutu kullanamazsın.", ephemeral=True)
-        return
 
-    c.execute("SELECT katilanlar, kivrik_sayisi FROM sets")
-    rows = c.fetchall()
-
-    if not rows:
-        await interaction.response.send_message("Kayıt yok.")
-        return
-
-    set_sayilari = defaultdict(int)
-    for katilanlar, _ in rows:
-        oyuncular = [isim.strip() for isim in katilanlar.split(",")]
-        for oyuncu in oyuncular:
-            set_sayilari[oyuncu] += 1
-
-    embed = discord.Embed(title="📋 Haftalık Katılım Raporu", color=discord.Color.blurple())
-
-    if set_sayilari:
-        for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
-            embed.add_field(name=oyuncu, value=f"{adet} set", inline=True)
-    else:
-        embed.description = "Katılım verisi bulunamadı."
-
-    await interaction.response.send_message(embed=embed)
 
 @bot.tree.command(name="sifirla", description="Tüm verileri sıfırla ve yedekle", guild=discord.Object(id=GUILD_ID))
 async def sifirla(interaction):
@@ -139,3 +112,38 @@ async def sifirla(interaction):
 
 keep_alive()
 bot.run(TOKEN)
+
+@bot.tree.command(name="rapor", description="Katılım raporu: kim kaç set geldi", guild=discord.Object(id=GUILD_ID))
+async def rapor(interaction):
+    try:
+        if not is_efsane(interaction):
+            await interaction.response.send_message("Bu komutu kullanamazsın.", ephemeral=True)
+            return
+
+        c.execute("SELECT katilanlar FROM sets")
+        rows = c.fetchall()
+
+        if not rows:
+            await interaction.response.send_message("Kayıt yok.")
+            return
+
+        from collections import defaultdict
+        set_sayilari = defaultdict(int)
+        for katilanlar_tuple in rows:
+            oyuncular = [isim.strip() for isim in katilanlar_tuple[0].split(",")]
+            for oyuncu in oyuncular:
+                set_sayilari[oyuncu] += 1
+
+        embed = discord.Embed(title="📋 Haftalık Katılım Raporu", color=discord.Color.blurple())
+
+        if set_sayilari:
+            for oyuncu, adet in sorted(set_sayilari.items(), key=lambda x: -x[1]):
+                embed.add_field(name=oyuncu, value=f"{adet} set", inline=True)
+        else:
+            embed.description = "Katılım verisi bulunamadı."
+
+        await interaction.response.send_message(embed=embed)
+
+    except Exception as e:
+        await interaction.response.send_message(f"Hata oluştu: {e}", ephemeral=True)
+
