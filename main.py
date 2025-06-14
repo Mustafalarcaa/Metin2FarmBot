@@ -82,19 +82,16 @@ async def rapor(interaction):
         await interaction.response.send_message("Kayıt yok.")
         return
 
-    set_sayilari = defaultdict(int)
     kivrik_toplam = defaultdict(int)
 
     for katilanlar, kivrik in rows:
         oyuncular = [isim.strip() for isim in katilanlar.split(",")]
         for oyuncu in oyuncular:
-            set_sayilari[oyuncu] += 1
             kivrik_toplam[oyuncu] += int(kivrik / len(oyuncular))
 
-    embed = discord.Embed(title="📊 Haftalık Katılım Raporu", color=discord.Color.purple())
     toplam_kivrik = sum(kivrik_toplam.values())
+    embed = discord.Embed(title="📊 Haftalık Katılım Raporu", color=discord.Color.purple())
     embed.add_field(name="Toplam Kıvrık", value=f"{toplam_kivrik} kıvrık", inline=False)
-    for oyuncu in sorted(set_sayilari.keys(), key=lambda x: -set_sayilari[x]):
 
     await interaction.response.send_message(embed=embed)
 
